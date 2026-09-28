@@ -1,0 +1,7 @@
+mlflow==2.14.1
+setuptools<81        # mlflow 2.14 imports pkg_resources; Python 3.12 venvs lack it
+sqlalchemy<2.1       # SQLAlchemy 2.1 removed a pool class mlflow 2.14 imports
+# pinned: rag_pipeline.py uses client.search / recreate_collection, removed in newer releases
+qdrant-client==1.12.1
+sentence-transformers
+ollama

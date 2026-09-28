@@ -1,0 +1,15 @@
+# Generated when running the Lab*/ scripts
+Lab*/.venv/
+Lab*/mlflow.db
+Lab*/mlruns/
+Lab*/churn_data.csv
+Lab*/scored.csv
+Lab*/model_export/
+Lab*/model.joblib
+Lab*/model.tar.gz
+Lab*/s3_uri.txt
+Lab*/qdrant_local/
+Lab*/*.bak
+Lab*/airflow_home/*
+!Lab*/airflow_home/dags/
+__pycache__/

@@ -1,0 +1,10 @@
+name: prompt-quality-gate
+on:
+  pull_request:
+    paths: ['rag_pipeline.py', 'kb/**', 'golden_set.py']
+jobs:
+  evaluate:
+    runs-on: [self-hosted]     # your machine: Ollama + Qdrant live here
+    steps:
+      - uses: actions/checkout@v4
+      - run: python ci_gate.py

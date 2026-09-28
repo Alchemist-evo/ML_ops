@@ -1,0 +1,27 @@
+"""12 questions with known source docs and must-contain facts."""
+GOLDEN = [
+  {"q": "How many days to return spoiled milk?",
+   "src": "refunds.md",       "must": ["7"]},
+  {"q": "Return window for an unopened jar of honey?",
+   "src": "refunds.md",       "must": ["30"]},
+  {"q": "Is my delivery fee refundable after dispatch?",
+   "src": "refunds.md",       "must": ["non-refundable"]},
+  {"q": "What does CartVista Plus cost?",
+   "src": "membership.md",    "must": ["299"]},
+  {"q": "Do Plus members pay for express delivery?",
+   "src": "membership.md",    "must": ["free"]},
+  {"q": "Above what order value is delivery free?",
+   "src": "delivery.md",      "must": ["999"]},
+  {"q": "How fast is express delivery?",
+   "src": "delivery.md",      "must": ["90"]},
+  {"q": "Can I pay cash for a Rs 6000 order?",
+   "src": "payments.md",      "must": ["5000"]},
+  {"q": "Is COD available on express orders?",
+   "src": "payments.md",      "must": ["not", "unavailable"]},
+  {"q": "Fee to cancel after my order is packed?",
+   "src": "cancellations.md", "must": ["20"]},
+  {"q": "Can I cancel once the rider has left?",
+   "src": "cancellations.md", "must": ["not"]},
+  {"q": "Do you sell mobile phones?",   # out-of-scope probe
+   "src": None,               "must": ["don't have"]},
+]
