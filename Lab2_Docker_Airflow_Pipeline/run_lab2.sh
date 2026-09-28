@@ -66,8 +66,12 @@ fi
 
 export AIRFLOW_HOME="$(pwd)/airflow_home"
 
-if [ "${INSTALL:-0}" = "1" ]; then
-  step "Step B1: Install Airflow 2.9.2"
+# Run Airflow through the same Python as the lab scripts, so it works even when the
+# 'airflow' executable is not on PATH (e.g. installed under ~/.local/bin).
+airflow() { "$PY" -m airflow "$@"; }
+
+if [ "${INSTALL:-0}" = "1" ] || ! "$PY" -c "import airflow" >/dev/null 2>&1; then
+  step "Step B1: Install Airflow 2.9.2 (one-time, needs internet)"
   PYVER="$("$PY" -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")')"
   "$PY" -m pip install "apache-airflow==2.9.2" --constraint \
     "https://raw.githubusercontent.com/apache/airflow/constraints-2.9.2/constraints-${PYVER}.txt"
@@ -81,14 +85,15 @@ step "Step B2: Check the DAG parses"
 airflow dags list | grep cartvista || true
 
 step "Step B3: Run the full pipeline (gate = 0.72)"
-CARTVISTA_AUC_GATE=0.72 airflow dags test cartvista_weekly_retrain
+env CARTVISTA_AUC_GATE=0.72 "$PY" -m airflow dags test cartvista_weekly_retrain
 
 step "Step B4: Prove the gate works (gate = 0.95 -> validate_best fails, promote never runs)"
-CARTVISTA_AUC_GATE=0.95 airflow dags test cartvista_weekly_retrain \
+env CARTVISTA_AUC_GATE=0.95 "$PY" -m airflow dags test cartvista_weekly_retrain \
   || echo ">>> Gate failed as expected; promote was upstream_failed."
 
 echo
-echo "For the Grid-view screenshots, run 'airflow standalone' (UI at http://localhost:8080)"
-echo "with AIRFLOW_HOME=$AIRFLOW_HOME and trigger:  airflow dags trigger cartvista_weekly_retrain"
+echo "For the Grid-view screenshots, run (UI at http://localhost:8080):"
+echo "  export AIRFLOW_HOME=$AIRFLOW_HOME && $PY -m airflow standalone"
+echo "then in a second terminal (same AIRFLOW_HOME):  $PY -m airflow dags trigger cartvista_weekly_retrain"
 
 step "Lab 2 complete"

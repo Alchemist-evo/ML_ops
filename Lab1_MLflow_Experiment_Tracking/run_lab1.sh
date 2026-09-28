@@ -52,10 +52,10 @@ step "Step 7: Consume the champion from a separate program"
 step "Step 5: Compare runs in the MLflow UI"
 if [ "${OPEN_UI:-0}" = "1" ]; then
   echo "Starting MLflow UI on http://127.0.0.1:5000 (Ctrl+C to stop)"
-  mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5000
+  "$PY" -m mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5000
 else
   echo "Run this to open the UI (or re-run with OPEN_UI=1):"
-  echo "  mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5000"
+  echo "  $PY -m mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5000"
 fi
 
 step "Lab 1 complete"

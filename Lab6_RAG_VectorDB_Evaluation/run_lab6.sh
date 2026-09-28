@@ -48,6 +48,6 @@ step "Step B3: Harness for chunk sizes 20 and 200"
 
 echo
 echo "Compare runs in experiments 'cartvista-rag' and 'cartvista-rag-eval':"
-echo "  mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5000"
+echo "  $PY -m mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5000"
 
 step "Lab 6 complete"
