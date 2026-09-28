@@ -18,6 +18,9 @@ if   [ -f .venv/Scripts/activate ]; then source .venv/Scripts/activate
 elif [ -f .venv/bin/activate ];     then source .venv/bin/activate
 fi
 PY="${PYTHON:-$(command -v python || command -v python3)}"
+OLLAMA_MODEL="${OLLAMA_MODEL:-llama3.2:1b}"
+VLLM_MODEL="${VLLM_MODEL:-Qwen/Qwen2.5-0.5B-Instruct}"
+LANGFUSE_HOST="${LANGFUSE_HOST:-http://localhost:3000}"
 step() { printf '\n===== %s =====\n' "$*"; }
 wait_for() {   # wait_for URL SECONDS
   for _ in $(seq 1 "${2:-90}"); do curl -sf "$1" >/dev/null 2>&1 && return 0; sleep 1; done
@@ -38,6 +41,15 @@ fi
 curl -sf http://localhost:11434/api/tags >/dev/null \
   || { echo "Ollama is not running -- start the Ollama app or 'ollama serve'."; exit 1; }
 
+if ! ollama list 2>/dev/null | grep -q "${OLLAMA_MODEL}"; then
+  echo "Pulling missing model: ${OLLAMA_MODEL}"
+  ollama pull "$OLLAMA_MODEL"
+fi
+
+if [ -n "${LANGFUSE_PUBLIC_KEY:-}" ] && [ -n "${LANGFUSE_SECRET_KEY:-}" ]; then
+  export LANGFUSE_HOST
+fi
+
 # ============================ PART A ==========================================
 if [ -z "${ROUTE:-}" ]; then
   if command -v nvidia-smi >/dev/null 2>&1 && "$PY" -c "import vllm" >/dev/null 2>&1; then
@@ -49,7 +61,7 @@ if [ "$ROUTE" = "vllm" ]; then
   [ "${INSTALL:-0}" = "1" ] && "$PY" -m pip install vllm
   step "Step A1: Start the vLLM server on :8010"
   "$PY" -m vllm.entrypoints.openai.api_server \
-    --model Qwen/Qwen2.5-0.5B-Instruct \
+    --model "$VLLM_MODEL" \
     --max-model-len 2048 --port 8010 &
   VLLM_PID=$!
   wait_for http://localhost:8010/v1/models 900     # first start downloads ~1 GB

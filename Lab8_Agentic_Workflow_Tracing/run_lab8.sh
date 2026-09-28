@@ -14,20 +14,26 @@ if   [ -f .venv/Scripts/activate ]; then source .venv/Scripts/activate
 elif [ -f .venv/bin/activate ];     then source .venv/bin/activate
 fi
 PY="${PYTHON:-$(command -v python || command -v python3)}"
+OLLAMA_MODEL="${OLLAMA_MODEL:-llama3.2:1b}"
+LANGFUSE_HOST="${LANGFUSE_HOST:-http://localhost:3000}"
 step() { printf '\n===== %s =====\n' "$*"; }
 
 if [ "${INSTALL:-0}" = "1" ]; then
   step "Installing requirements"
   "$PY" -m pip install -r requirements.txt
-  ollama pull llama3.2:1b
+  ollama pull "$OLLAMA_MODEL"
 fi
 
 curl -sf http://localhost:11434/api/tags >/dev/null \
   || { echo "Ollama is not running -- start the Ollama app or 'ollama serve'."; exit 1; }
+if ! ollama list 2>/dev/null | grep -q "${OLLAMA_MODEL}"; then
+  echo "Pulling missing model: ${OLLAMA_MODEL}"
+  ollama pull "$OLLAMA_MODEL"
+fi
 if [ -z "${LANGFUSE_PUBLIC_KEY:-}" ] || [ -z "${LANGFUSE_SECRET_KEY:-}" ]; then
   echo "WARNING: Langfuse keys not exported -- the agent will run but no traces will be recorded."
 fi
-export LANGFUSE_HOST="${LANGFUSE_HOST:-http://localhost:3080}"
+export LANGFUSE_HOST
 
 step "Step 1: Order system sanity check"
 "$PY" -c "from orders_db import lookup_order; print(lookup_order('ORD-1001')); print(lookup_order('ORD-9999'))"

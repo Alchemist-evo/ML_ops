@@ -14,17 +14,26 @@ if   [ -f .venv/Scripts/activate ]; then source .venv/Scripts/activate
 elif [ -f .venv/bin/activate ];     then source .venv/bin/activate
 fi
 PY="${PYTHON:-$(command -v python || command -v python3)}"
+OLLAMA_MODEL="${OLLAMA_MODEL:-llama3.2:1b}"
+EMBEDDER_MODEL="${EMBEDDER_MODEL:-all-MiniLM-L6-v2}"
 step() { printf '\n===== %s =====\n' "$*"; }
 
 if [ "${INSTALL:-0}" = "1" ]; then
   step "One-time setup: packages, LLM and embedder (~1.5 GB)"
   "$PY" -m pip install -r requirements.txt
-  ollama pull llama3.2:1b
-  "$PY" -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2'); print('embedder cached')"
+  ollama pull "$OLLAMA_MODEL"
+  "$PY" -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('$EMBEDDER_MODEL'); print('embedder cached')"
 fi
 
 curl -sf http://localhost:11434/api/tags >/dev/null \
   || { echo "Ollama is not running -- start the Ollama app or 'ollama serve'."; exit 1; }
+
+if ! ollama list 2>/dev/null | grep -q "${OLLAMA_MODEL}"; then
+  echo "Pulling missing model: ${OLLAMA_MODEL}"
+  ollama pull "$OLLAMA_MODEL"
+fi
+
+rm -rf "$(dirname "$0")/qdrant_local"
 
 # ============================ PART A ==========================================
 step "Step A2: The pipeline -- milk question (expect 7 days, refunds.md)"
